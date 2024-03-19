@@ -67,8 +67,8 @@ class Woo_Categories_Import_Admin {
 		$this->plugin_screen_hook_suffix = 
 		add_submenu_page(
 			'edit.php?post_type=product',
-			"Categories Import", 
-			"Categories Import",
+			"Import - Export", 
+			"Import - Export",
 			"manage_options",
 			"woo-categories-import-menu",
 			array($this,'admin_page'),
@@ -93,14 +93,35 @@ class Woo_Categories_Import_Admin {
 			}
 		}
 
+
+		
+		if (isset($_FILES['woo_brands_csv_file'])) {
+			$file = $_FILES['woo_brands_csv_file'];
+			$file_path = $file['tmp_name'];
+			
+			if (!empty($file_path)) {
+				$imported = $this->import_brands_from_csv($file_path);
+				if ($imported) {
+					echo '<div class="updated"><p>Importation réussie.</p></div>';
+				} else {
+					echo '<div class="error"><p>Erreur lors de l\'importation.</p></div>';
+				}
+			}
+		}
+
+
+
+
+
+
 		if(isset($_POST['woo_categories_export_csv'])){
 			$this->export_categories_to_csv();
 		}
 	}
 
+
 	public function import_categories_from_csv($file_path) {
-		// Lire le fichier CSV
-		$csv_data = $this->getCsvData($file_path); //array_map('str_getcsv', file($file_path));
+		$csv_data = $this->getCsvData($file_path); 
 	
 		if (empty($csv_data)) {
 			return false;
@@ -126,6 +147,25 @@ class Woo_Categories_Import_Admin {
 						)
 					);
 				}
+			}
+		}
+	
+		return true;
+	}
+
+	public function import_brands_from_csv($file_path) {
+		$csv_data = $this->getCsvData($file_path); 
+	
+		if (empty($csv_data)) {
+			return false;
+		}
+		
+		foreach ($csv_data as $row) {
+			$brand_name = $row[0]; 
+			$brand = term_exists($brand_name, 'ts_product_brand');
+
+			if (!$brand) {
+				$brand = wp_insert_term($brand_name, 'ts_product_brand');
 			}
 		}
 	
