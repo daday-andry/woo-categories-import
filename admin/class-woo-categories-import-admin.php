@@ -72,7 +72,6 @@ class Woo_Categories_Import_Admin {
 			"manage_options",
 			"woo-categories-import-menu",
 			array($this,'admin_page'),
-			'',
 			55.2
 		);
 	}
